@@ -20,6 +20,7 @@ package gateway
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ import (
 	grpcAccess "github.com/onflow/flow-go-sdk/access/grpc"
 	"github.com/onflow/flow-go/utils/grpcutils"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/onflow/flow-cli/flowkit/config"
@@ -63,6 +65,30 @@ func NewGrpcGateway(network config.Network) (*GrpcGateway, error) {
 		client:       gClient,
 		ctx:          ctx,
 		secureClient: false,
+	}, nil
+}
+
+func NewSystemSecureGrpcGateway(network config.Network) (*GrpcGateway, error) {
+	systemCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, fmt.Errorf("error getting system cert pool: %w", err)
+	}
+
+	gClient, err := grpcAccess.NewClient(
+		network.Host,
+		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(systemCertPool, "")),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxGRPCMessageSize)),
+	)
+	ctx := context.Background()
+
+	if err != nil || gClient == nil {
+		return nil, fmt.Errorf("failed to connect to host %s", network.Host)
+	}
+
+	return &GrpcGateway{
+		client:       gClient,
+		ctx:          ctx,
+		secureClient: true,
 	}, nil
 }
 

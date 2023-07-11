@@ -55,7 +55,7 @@ func createInteractive(state *flowkit.State) error {
 	privateFile := fmt.Sprintf("%s.pkey", name)
 
 	// create new gateway based on chosen network
-	gw, err := gateway.NewGrpcGateway(selectedNetwork)
+	gw, err := gateway.NewSystemSecureGrpcGateway(selectedNetwork)
 	if err != nil {
 		return err
 	}

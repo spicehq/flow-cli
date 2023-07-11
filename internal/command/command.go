@@ -175,7 +175,7 @@ func createGateway(network config.Network) (gateway.Gateway, error) {
 		return gateway.NewSecureGrpcGateway(network)
 	}
 
-	return gateway.NewGrpcGateway(network)
+	return gateway.NewSystemSecureGrpcGateway(network)
 }
 
 // resolveHost from the flags provided.
